@@ -16,4 +16,10 @@ public class Brick : MonoBehaviour
         Debug.Log("砖块被销毁，获得分数:"+hitScore);
         Destroy(gameObject);
     }
+
+    public void HitBrick()
+    {
+        //后续逻辑补充
+        Destroy(gameObject);
+    }
 }

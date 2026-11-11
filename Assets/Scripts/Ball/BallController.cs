@@ -8,18 +8,17 @@ public class BallController : MonoBehaviour
     private float launchSpeed=5f;
     [SerializeField]
     private float maxReflectionAngle=60f;
-
+    public GameObject paddle;
+    public Vector3 offsetStartPosition=new Vector3(0,0.7f,0);
     public ScoreManager scoreManager;
     private bool isLaunched=false;
     private bool launchRequested = false;
     private Vector2 lastVelocity;
     private Rigidbody2D rb;
-    private Vector2 startPosition;
 
     void Awake()
     {
         rb=GetComponent<Rigidbody2D>();
-        startPosition=transform.position;
     }
 
     void Start()
@@ -29,18 +28,22 @@ public class BallController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && !isLaunched)
+        if(GameManager.Instance.CurrentGameState == E_GameState.Ready&& !isLaunched)
         {
-            launchRequested=true;
+            transform.position=paddle.transform.position+offsetStartPosition;
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                GameManager.Instance.StartGame();
+                launchRequested=true;
+            }
         }
     }
 
     void FixedUpdate()
     {
-        if (!isLaunched&&launchRequested)
+        if (!isLaunched&&launchRequested&&GameManager.Instance.CurrentGameState == E_GameState.Playing)
         {
             rb.velocity = Vector2.up * launchSpeed;
-
             isLaunched = true;
             launchRequested = false;
         }
@@ -77,22 +80,7 @@ public class BallController : MonoBehaviour
     /// <param name="collision2D">碰撞信息</param>
     public void ReflectBall(Collision2D collision2D)
     {
-         //挡板中心位置
-        Vector2 paddlePos=collision2D.gameObject.transform.position;
-        //碰撞点位置
-        Vector2 hitPoint=collision2D.contacts[0].point;
-        //挡板半宽长度
-        float paddleHalfWidth=collision2D.collider.bounds.extents.x;
-        //碰撞位置的偏移比例
-        float offsetRatio= (hitPoint.x-paddlePos.x)/paddleHalfWidth;
-        offsetRatio=Mathf.Clamp(offsetRatio, -1f, 1f);
-        //根据偏移比例计算反射角度
-        float angle=offsetRatio*maxReflectionAngle;
-        //角度转为弧度
-        float radAngle=angle*Mathf.Deg2Rad;
-        //计算反弹方向
-        Vector2 newDirection=new Vector2(Mathf.Sin(radAngle), Mathf.Cos(radAngle));
-        rb.velocity = newDirection * launchSpeed;
+        SpecialReflect(collision2D);
     }
 
     /// <summary>
@@ -101,15 +89,8 @@ public class BallController : MonoBehaviour
     /// <param name="collision2D"></param>
     public void ReflectBrick(Collision2D collision2D)
     {
-        Vector2 normal=collision2D.contacts[0].normal;
-        Vector2 direction=Vector2.Reflect(lastVelocity.normalized,normal).normalized;
-        rb.velocity=direction*launchSpeed;
-         Brick brick=collision2D.gameObject.GetComponent<Brick>();
-        if (brick != null)
-        {
-            scoreManager.AddScore(brick.HitScore);
-            brick.DestroyBrick();
-        }
+        NormalReflect(collision2D);
+        collision2D.gameObject.GetComponent<Brick>().HitBrick();
     }
 
     /// <summary>
@@ -118,9 +99,7 @@ public class BallController : MonoBehaviour
     /// <param name="collision2D"></param>
     public void ReflectWall(Collision2D collision2D)
     {
-        Vector2 normal=collision2D.contacts[0].normal;
-        Vector2 direction=Vector2.Reflect(lastVelocity.normalized,normal).normalized;
-        rb.velocity=direction*launchSpeed;
+        NormalReflect(collision2D);
     }
 
     /// <summary>
@@ -128,8 +107,74 @@ public class BallController : MonoBehaviour
     /// </summary>
     public void DeadZone()
     {
+        GameManager.Instance.SubtractLife(1);
+        if (GameManager.Instance.CurrentGameState == E_GameState.GameOver)
+        {
+            DestroyBall();
+        }
+        else
+        {
+            ResetBall();
+        }
+    }
+
+    /// <summary>
+    /// 普通反射处理
+    /// </summary>
+    /// <param name="collision2D"></param>
+    public void NormalReflect(Collision2D collision2D)
+    {
+        Vector2 normal=collision2D.contacts[0].normal;
+        Vector2 direction=Vector2.Reflect(lastVelocity.normalized,normal).normalized;
+        rb.velocity=direction*launchSpeed;
+    }
+
+    /// <summary>
+    /// 特殊反射处理：根据碰撞点距离两边的位置
+    /// </summary>
+    /// <param name="collision2D"></param>
+    public void SpecialReflect(Collision2D collision2D)
+    {
+        // 获取小球碰撞前的运动方向
+        Vector2 incomingDir = rb.velocity.normalized;
+        // 计算小球原本的运动角度
+        float incomingAngle = Mathf.Atan2(incomingDir.x, -incomingDir.y) * Mathf.Rad2Deg;
+        //挡板中心位置
+        Vector2 paddlePos=collision2D.gameObject.transform.position;
+         //碰撞点位置
+        Vector2 hitPoint=collision2D.contacts[0].point;
+        //挡板半宽长度
+        float paddleHalfWidth=collision2D.collider.bounds.extents.x;
+        //碰撞位置的偏移比例
+        float offsetRatio= (hitPoint.x-paddlePos.x)/paddleHalfWidth;
+        // 根据碰撞位置计算挡板影响角度
+        float paddleAngle = offsetRatio * maxReflectionAngle;
+        // 混合两个角度：70%保留原方向，30%受挡板位置影响
+        float angle = incomingAngle * 0.7f + paddleAngle * 0.3f;
+       // 限制最大反弹角度
+        angle = Mathf.Clamp(angle, -maxReflectionAngle, maxReflectionAngle);
+        // 转换为弧度
+        float radAngle = angle * Mathf.Deg2Rad;
+        // 计算新的反弹方向
+        Vector2 newDirection = new Vector2(Mathf.Sin(radAngle), Mathf.Cos(radAngle));
+        rb.velocity = newDirection * launchSpeed;
+    }
+
+    /// <summary>
+    /// 重置小球
+    /// </summary>
+    public void ResetBall()
+    {
         isLaunched=false;
-        transform.position=startPosition;
         rb.velocity=Vector2.zero;
+        lastVelocity=Vector2.zero;
+        transform.position=paddle.transform.position+offsetStartPosition;
+    }
+
+    public void DestroyBall()
+    {
+        ResetBall();
+        paddle.GetComponent<PaddleController>().CanInput=false;
+        this.gameObject.SetActive(false);
     }
 }

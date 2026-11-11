@@ -147,12 +147,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9308619}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.047489844, y: 1.9681774, z: -0.003586314}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1811980589}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &9308621
 MonoBehaviour:
@@ -329,6 +329,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   launchSpeed: 5
   maxReflectionAngle: 60
+  paddle: {fileID: 876542720}
+  offsetStartPosition: {x: 0, y: 0.7, z: 0}
   scoreManager: {fileID: 9308621}
 --- !u!1 &427165276
 GameObject:
@@ -1001,6 +1003,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1747960156}
+  - component: {fileID: 1747960157}
   m_Layer: 0
   m_Name: BrickContainer
   m_TagString: Untagged
@@ -1023,6 +1026,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1747960157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1747960155}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58d60116c8f73d1498886059b87e24a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  brickPrefab: {fileID: 6414948611907507039, guid: c8681e3bc75e2f44b9ba96db8b70071e, type: 3}
+  rows: 5
+  columns: 10
+  spacingX: 1.55
+  spacingY: 1
+  startPosition: {x: -7, y: 4, z: 0}
+  bricksParent: {fileID: 1747960156}
 --- !u!1 &1811980588
 GameObject:
   m_ObjectHideFlags: 0
@@ -1032,7 +1054,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1811980589}
-  - component: {fileID: 1811980590}
+  - component: {fileID: 1811980591}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1052,11 +1074,10 @@ Transform:
   m_LocalPosition: {x: 0.047489844, y: 1.9681774, z: -0.003586314}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 9308620}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1811980590
+--- !u!114 &1811980591
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1065,16 +1086,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1811980588}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 58d60116c8f73d1498886059b87e24a1, type: 3}
+  m_Script: {fileID: 11500000, guid: 547e242b0f84b7d42b7c6545cb7980b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  brickPrefab: {fileID: 6414948611907507039, guid: c8681e3bc75e2f44b9ba96db8b70071e, type: 3}
-  rows: 5
-  columns: 10
-  spacingX: 1.55
-  spacingY: 1
-  startPosition: {x: -7, y: 4, z: 0}
-  bricksParent: {fileID: 1747960156}
+  maxLife: 3
 --- !u!1 &1943191838
 GameObject:
   m_ObjectHideFlags: 0
@@ -1213,6 +1228,7 @@ SceneRoots:
   - {fileID: 876542722}
   - {fileID: 256387655}
   - {fileID: 1811980589}
+  - {fileID: 9308620}
   - {fileID: 1747960156}
   - {fileID: 1403294438}
   - {fileID: 1507405588}

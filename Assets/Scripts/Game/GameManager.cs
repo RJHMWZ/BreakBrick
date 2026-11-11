@@ -17,35 +17,28 @@ public class GameManager : MonoBehaviour
 {
     private static GameManager instance;
     public static GameManager Instance=> instance;
-
+    public int maxLife=3;
     [Tooltip("当前游戏状态")]
-    public E_GameState currentGameState=E_GameState.Ready;
-
-    private int life=3;
-    public int Life
-    {
-        get { return life; }
-        set
-        {
-            life = value;
-            if (life <= 0)
-            {
-                life = 0;
-            }
-        }
-    }
+    private E_GameState currentGameState=E_GameState.Ready;
+    public E_GameState CurrentGameState { get { return currentGameState; } }
+    private int life;
+    public int Life{get { return life; }}
 
     void Awake()
     {
         if (instance == null)
         {
             instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
         }
+    }
+
+    void Start()
+    {
+        life=maxLife;
     }
 
     public void SetGameState(E_GameState newState)
@@ -61,7 +54,11 @@ public class GameManager : MonoBehaviour
         if(currentGameState == E_GameState.Ready)
         {
             SetGameState(E_GameState.Playing);
-            Debug.Log("游戏开始！");
+            Debug.Log("游戏开始!");
+        }
+        else
+        {
+            Debug.Log("当前游戏状态为不是Ready,无法开始游戏");
         }
     }
 
@@ -91,7 +88,9 @@ public class GameManager : MonoBehaviour
     {
         if(currentGameState == E_GameState.Playing)
         {
-            Life += amount;
+            life += amount;
+            life=Mathf.Clamp(life,0,maxLife);
+            Debug.Log("扣血成功，现在的血量为："+life);
         }
     }
 
@@ -103,15 +102,16 @@ public class GameManager : MonoBehaviour
     {
         if(currentGameState == E_GameState.Playing)
         {
-            Life -= amount;
-            if (Life <= 0)
+            life -= amount;
+            life=Mathf.Clamp(life,0,maxLife);
+            if (life <= 0)
             {
                 GameOver();
             }
+            else
+            {
+                SetGameState(E_GameState.Ready);
+            }
         }
     }
-
-
-
-
 }

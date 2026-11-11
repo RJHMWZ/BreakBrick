@@ -15,10 +15,11 @@ public class PaddleController : MonoBehaviour
     private float maxX=7f;
 
     private float horizontalInput;
+    public bool CanInput=true;
 
     void Update()
     {
-        horizontalInput = Input.GetAxisRaw("Horizontal");
+        horizontalInput=CanInput?Input.GetAxisRaw("Horizontal"):0f;
     }
 
     void FixedUpdate()
