@@ -57,6 +57,18 @@ public class BallController : MonoBehaviour
         {
             ReflectBrick(collision2D);
         }
+        else if (collision2D.gameObject.CompareTag("Wall"))
+        {
+            ReflectWall(collision2D);
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("DeadZone"))
+        {
+            DeadZone();
+        }
     }
     
     /// <summary>
@@ -98,5 +110,26 @@ public class BallController : MonoBehaviour
             scoreManager.AddScore(brick.HitScore);
             brick.DestroyBrick();
         }
+    }
+
+    /// <summary>
+    /// 墙壁碰撞处理
+    /// </summary>
+    /// <param name="collision2D"></param>
+    public void ReflectWall(Collision2D collision2D)
+    {
+        Vector2 normal=collision2D.contacts[0].normal;
+        Vector2 direction=Vector2.Reflect(lastVelocity.normalized,normal).normalized;
+        rb.velocity=direction*launchSpeed;
+    }
+
+    /// <summary>
+    /// 死亡区域触发处理
+    /// </summary>
+    public void DeadZone()
+    {
+        isLaunched=false;
+        transform.position=startPosition;
+        rb.velocity=Vector2.zero;
     }
 }
