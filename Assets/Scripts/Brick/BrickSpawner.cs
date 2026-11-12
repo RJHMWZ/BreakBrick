@@ -30,12 +30,12 @@ public class BrickSpawner : MonoBehaviour
     public Transform bricksParent;
     private BrickColor colorBrick=BrickColor.Red;
 
-
-    void Awake()
+    void Start()
     {
-        if(brickPrefab==null)
+         if(brickPrefab==null)
         {
             Debug.LogError("砖块预制体未设置！");
+            return;
         }
         SpawnBricks();
     }
@@ -54,6 +54,7 @@ public class BrickSpawner : MonoBehaviour
                 );
                 GameObject brick= Instantiate(brickPrefab, position, Quaternion.identity, bricksParent);
                 brick.GetComponent<SpriteRenderer>().color=GetColorFromEnum(colorBrick);
+                GameManager.Instance.RegesterBrickEvent(brick.GetComponent<Brick>());
             }
             colorBrick+=1;
         }

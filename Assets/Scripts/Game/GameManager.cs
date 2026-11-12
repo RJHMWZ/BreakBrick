@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 
 /// <summary>
@@ -15,10 +16,21 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    private readonly List<Brick> bricksList = new List<Brick>();
+
+    public int RemainingBricks => bricksList.Count;
+
+    [SerializeField]
+    private ScoreManager scoreManager;
+
+    [SerializeField]
+    private BallController ballController;
+
+    [SerializeField]
+    private PaddleController paddleController;
     private static GameManager instance;
     public static GameManager Instance=> instance;
     public int maxLife=3;
-    [Tooltip("当前游戏状态")]
     private E_GameState currentGameState=E_GameState.Ready;
     public E_GameState CurrentGameState { get { return currentGameState; } }
     private int life;
@@ -76,7 +88,16 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void Victory()
     {
+         if (currentGameState != E_GameState.Playing)
+        {
+            return;
+        }
+
         SetGameState(E_GameState.Victory);
+
+        ballController.StopBall();
+        paddleController.CanInput = false;
+
         Debug.Log("游戏胜利！");
     }
 
@@ -112,6 +133,67 @@ public class GameManager : MonoBehaviour
             {
                 SetGameState(E_GameState.Ready);
             }
+        }
+    }
+
+    /// <summary>
+    /// 砖块创造处理逻辑
+    /// </summary>
+    /// <param name="brick"></param>
+    public void RegesterBrickEvent(Brick brick)
+    {
+        if (brick == null || bricksList.Contains(brick))
+        {
+            return;
+        }
+
+        bricksList.Add(brick);
+        brick.OnBrickDestroy += HandleBrickDestroyed;
+    }
+
+    /// <summary>
+    /// 砖块销毁处理逻辑
+    /// </summary>
+    /// <param name="brick"></param>
+    /// <param name="Score"></param>
+    public void HandleBrickDestroyed(Brick brick,int score)
+    {
+        if (currentGameState != E_GameState.Playing)
+        {
+            return;
+        }
+
+        if (!bricksList.Remove(brick))
+        {
+            return;
+        }
+
+        brick.OnBrickDestroy -= HandleBrickDestroyed;
+        scoreManager.AddScore(score);
+        Debug.Log("剩余砖块：" + RemainingBricks);
+
+        if (RemainingBricks == 0)
+        {
+            Victory();
+        }
+    }
+
+    /// <summary>
+    /// 游戏结束清理
+    /// </summary>
+    private void OnDestroy()
+    {
+        foreach (Brick brick in bricksList)
+        {
+            if (brick != null)
+            {
+                brick.OnBrickDestroy -= HandleBrickDestroyed;
+            }
+        }
+        bricksList.Clear();
+        if (instance == this)
+        {
+            instance = null;
         }
     }
 }

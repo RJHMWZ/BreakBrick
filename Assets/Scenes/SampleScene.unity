@@ -329,9 +329,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   launchSpeed: 5
   maxReflectionAngle: 60
+  ballAttack: 1
   paddle: {fileID: 876542720}
   offsetStartPosition: {x: 0, y: 0.7, z: 0}
-  scoreManager: {fileID: 9308621}
 --- !u!1 &427165276
 GameObject:
   m_ObjectHideFlags: 0
@@ -785,6 +785,7 @@ MonoBehaviour:
   speed: 10
   minX: -7.5
   maxX: 7.5
+  CanInput: 1
 --- !u!61 &876542724
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1089,6 +1090,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 547e242b0f84b7d42b7c6545cb7980b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  scoreManager: {fileID: 9308621}
+  ballController: {fileID: 256387658}
+  paddleController: {fileID: 876542723}
   maxLife: 3
 --- !u!1 &1943191838
 GameObject:

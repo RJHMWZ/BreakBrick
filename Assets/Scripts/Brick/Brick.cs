@@ -1,25 +1,49 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class Brick : MonoBehaviour
 {
+    [SerializeField]
+    [Tooltip("砖块的耐久")]
+    private int hpBrick=1;
+    [SerializeField]
     [Tooltip("砖块的分数")]
     private int hitScore=10;
-    public int HitScore { get { return hitScore; } set { hitScore = value; } }
+    public int HitScore=>hitScore;
+    private bool isDestroyed;
+    public event Action<Brick,int> OnBrickDestroy;
 
     /// <summary>
     /// 销毁砖块
     /// </summary>
     public void DestroyBrick()
     {
-        Debug.Log("砖块被销毁，获得分数:"+hitScore);
+        if (isDestroyed)
+        {
+            return;
+        }
+        isDestroyed = true;
+        OnBrickDestroy?.Invoke(this,hitScore);
         Destroy(gameObject);
     }
 
-    public void HitBrick()
+    /// <summary>
+    /// 击打砖块
+    /// </summary>
+    /// <param name="ballAttack">球的攻击力</param>
+    public void HitBrick(int ballAttack)
     {
-        //后续逻辑补充
-        Destroy(gameObject);
+        if (isDestroyed || ballAttack <= 0)
+        {
+            return;
+        }
+        hpBrick -= ballAttack;
+        if (hpBrick <= 0)
+        {
+            DestroyBrick();
+        }
     }
 }

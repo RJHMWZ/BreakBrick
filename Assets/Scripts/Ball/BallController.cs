@@ -5,12 +5,16 @@ using UnityEngine;
 public class BallController : MonoBehaviour
 {
     [SerializeField]
+    [Tooltip("球的发射速度")]
     private float launchSpeed=5f;
     [SerializeField]
+    [Tooltip("球的最大反射角度")]
     private float maxReflectionAngle=60f;
+    [SerializeField]
+    [Tooltip("球的攻击力")]
+    private int ballAttack=1;
     public GameObject paddle;
     public Vector3 offsetStartPosition=new Vector3(0,0.7f,0);
-    public ScoreManager scoreManager;
     private bool isLaunched=false;
     private bool launchRequested = false;
     private Vector2 lastVelocity;
@@ -52,6 +56,10 @@ public class BallController : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision2D)
     {
+        if (GameManager.Instance.CurrentGameState != E_GameState.Playing)
+        {
+            return;
+        }
         if (collision2D.gameObject.CompareTag("Player"))
         {
             ReflectBall(collision2D);
@@ -68,6 +76,10 @@ public class BallController : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        if (GameManager.Instance.CurrentGameState != E_GameState.Playing)
+        {
+            return;
+        }
         if (other.CompareTag("DeadZone"))
         {
             DeadZone();
@@ -90,7 +102,7 @@ public class BallController : MonoBehaviour
     public void ReflectBrick(Collision2D collision2D)
     {
         NormalReflect(collision2D);
-        collision2D.gameObject.GetComponent<Brick>().HitBrick();
+        collision2D.gameObject.GetComponent<Brick>().HitBrick(ballAttack);
     }
 
     /// <summary>
@@ -165,10 +177,21 @@ public class BallController : MonoBehaviour
     /// </summary>
     public void ResetBall()
     {
-        isLaunched=false;
-        rb.velocity=Vector2.zero;
-        lastVelocity=Vector2.zero;
-        transform.position=paddle.transform.position+offsetStartPosition;
+        StopBall();
+        rb.position = (Vector2)(paddle.transform.position + offsetStartPosition);
+    }
+
+    /// <summary>
+    /// 停止小球
+    /// </summary>
+    public void StopBall()
+    {
+        isLaunched = false;
+        launchRequested = false;
+
+        rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        lastVelocity = Vector2.zero;
     }
 
     public void DestroyBall()
